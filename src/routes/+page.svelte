@@ -1,33 +1,23 @@
 <script>
-    import { chat, room, character } from '../stores.js';
+    /* ~~ data ~~ */
+    import { chat } from '../stores.js';
 
+    /* ~~ generic functions ~~ */
+    import { promptFormatter, generateContent } from '../helpers/contentGeneration.js';
+
+    /* ~~ svelte parts ~~ */
+    import { get } from 'svelte/store'
+    import { onMount } from 'svelte'
+
+    /* ~~ components ~~ */
     import Stats from '../components/stats.svelte'
     import Room from '../components/room.svelte'
     import Character from '../components/character.svelte'
+    import Interactions from '../components/interactions.svelte';
+    import Inventory from '../components/inventory.svelte';
+    import Move from '../components/move.svelte';
 
-    import { get } from 'svelte/store'
-    import { onMount, setContext } from 'svelte'
     let msg = get(chat).messages
-
-    function promptFormatter(prompt) {
-        return {"role": "user", "content": prompt}
-    }
-
-    async function generateContent(data) {
-        const response = await fetch('/api/generate/attributes', {
-            method: 'POST',
-            body: JSON.stringify(data),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        msg.messages.push({"role": "assistant", "content": await response.text()})
-        console.log("msg 3")
-        console.log(msg.messages)
-        chat.set({
-            messages: msg.messages
-        })
-    }
 
     async function charEdit() {
         const response = await fetch('/api/generate/attributes', {
@@ -38,24 +28,10 @@
         console.log(total)
         return total
     }
-    async function move(direction) {
-        msg.messages.push(promptFormatter("You move toward " + direction))
-        await generateContent(msg.messages)
-    }
 
     async function initDungeon() {
         msg.messages.push(promptFormatter("You enter a mysterious realm"))
-        await generateContent(msg.messages)
-    }
-
-    async function examine(object) {
-        msg.messages.push(promptFormatter("You examine " + object))
-        await generateContent(msg.messages)
-    }
-
-    async function use() {
-        msg.messages.push(promptFormatter("You use " + object))
-        await generateContent(msg.messages)
+        await generateContent(msg.messages, chat, msg)
     }
 
     //onMount(charEdit)
@@ -63,18 +39,13 @@
     chat.subscribe(value => {
         msg = value
     })
+
 </script>
 
 <h1>Literally endless</h1>
-{#each Object.entries(msg.messages) as [text]}
-  <p>{text}</p>
-{/each}
-<button on:click={() => move('north')}>North</button>
-<button on:click={() => move('west')}>West</button>
-<button on:click={() => move('east')}>East</button>
-<button on:click={() => move('south')}>South</button>
-<button on:click={() => examine()}>Examine</button>
-<button on:click={() => fight()}>Fight</button>
 <Stats></Stats>
 <Character></Character>
 <Room></Room>
+<Interactions></Interactions>
+<Inventory></Inventory>
+<Move></Move>

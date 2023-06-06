@@ -12,12 +12,10 @@ const openai = new OpenAIApi(configuration);
 
 export async function POST({ request }) {
   const prompt = await request.json()
-  console.log("imgprompt")
-  console.log(prompt)
   const response = await openai.createImage({
-    prompt: prompt.description+ " as video game cgi graphics in the style of the game Myst and Riven",
+    prompt: prompt,
     n: 1,
-    size: "512x512",
+    size: "256x256",
   });
   let url = response.data.data[0].url
 

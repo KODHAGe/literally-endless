@@ -10,25 +10,11 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);  
 
-/** @type {import('./$types').RequestHandler} */
-export async function GET({ url }) {
-    const response = await openai.createChatCompletion({
-        model: "gpt-3.5-turbo",
-        messages: [
-          {"role": "system", "content": "You are a helpful json generator. You return only valid json objects."},
-          {"role": "user", "content": "Return a json object with the keys health, strength and mana. Do not include any explanations or notes, only provide a  RFC8259 compliant JSON response."}
-        ]
-    });
-    let text = response.data.choices[0].message.content
-
-    console.log(text)
-    return new Response(String(text));
-}
+/** @type {import('./$types.js').RequestHandler} */
 
 export async function POST({ request }) {
   console.log("RECEIVED")
   const prompt = await request.json()
-  console.log(prompt)
   const response = await openai.createChatCompletion({
       model: "gpt-3.5-turbo",
       messages: prompt

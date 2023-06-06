@@ -1,26 +1,23 @@
 <script>
-        import { chat } from '../stores.js';
-        let current
-        chat.subscribe(value => {
-            current = value.messages[value.messages.length - 1]
-        })
+    import { chat } from '../stores.js';
+    let current
+    chat.subscribe(value => {
+        current = value.messages[value.messages.length - 1]
+    })
 
-        function parseAttributes() {
+    function parseAttributes(current) {
         if(current.role == "assistant") {
+            console.log(current)
             let json = JSON.parse(current.content)
+            console.log(json.player_attributes)
             return json.player_attributes
         } else {
             return 'unknown attrs'
         }
-        }
-/*
-        "player_attributes": {
-        "health": 100,
-        "hunger": 0,
-        "thirst": 0,
-        "sanity": 100
-    },*/
+    }
     $: attr = parseAttributes(current)
 
 </script>
-<p>{JSON.stringify(attr)}</p>
+{#each Object.entries(attr) as [key, value]}
+  <p>{key}:{value}</p>
+{/each}

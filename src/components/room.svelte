@@ -1,39 +1,45 @@
 <script>
-    import { chat } from '../stores.js';
+    import { chat, room } from '../stores.js';
 
-    let current_room
-    let img = ""
+    let currentRoom,
+        previousRoom,
+        img
 
     chat.subscribe(value => {
-        current_room = value.messages[value.messages.length - 1]
+        currentRoom = value.messages[value.messages.length - 1]
     })
 
-    async function roomImage(current_room) {
-        if(current_room.role == "assistant" && JSON.parse(current_room.content).room_image_prompt) {
+    room.subscribe(value => {
+        previousRoom = value.img_prompt
+    })
+
+    async function roomImage(currentRoom) {
+        let currentJson = JSON.parse(currentRoom.content)
+        if(currentRoom.role == "assistant" && currentJson.room_image_prompt && currentJson.room_image_prompt != previousRoom) {
             const response = await fetch('/api/generate/images', {
                 method: 'POST',
-                body: JSON.stringify(JSON.parse(current_room.content).room_image_prompt)
+                body: JSON.stringify(currentJson.room_image_prompt + " as video game cgi graphics in the style of the game Myst and Riven")
             });
             let url = await response.json();
-            console.log(url)
             img = url
+            room.set({img_prompt: currentJson.room_image_prompt})
             return url
         } else {
             return 'foo'
         }
     }
 
-    function desc(current_room) {
-        if(current_room.role == "assistant") {
-            let json = JSON.parse(current_room.content)
+    function desc(currentRoom) {
+        if(currentRoom.role == "assistant") {
+            let json = JSON.parse(currentRoom.content)
             return json.room_description
         } else {
             return 'Loading ...'
         }
     }
 
-    $: img = roomImage(current_room)
-    $: description = desc(current_room)
+    $: img = roomImage(currentRoom)
+    $: description = desc(currentRoom)
 
 </script>
 <p>{description}</p>
